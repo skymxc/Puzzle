@@ -98,4 +98,35 @@ public class DBUtil {
         cv.put("type",image.type);
         db.insert("image","level",cv);
     }
+
+    /**
+     * 删除图片
+     * @param id
+     */
+    public static void delImage(int id){
+        SQLiteDatabase db = DBHelper.getDB();
+        db.delete("image","_id =?",new String[]{id+""});
+    }
+
+    /**
+     * 修改 图片的等级
+     * @param id 图片id
+     * @param level 等级
+     */
+    public static void updateImage(int id,int level){
+        SQLiteDatabase db = DBHelper.getDB();
+        ContentValues cv = new ContentValues();
+        cv.put("level",level);
+        db.update("image",cv,"_id =?" ,new String[]{id+""});
+    }
+
+    /**
+     * 更新图等级
+     * @param id
+     * @param level
+     */
+    public static void updatePuzzle(int id,int level){
+        SQLiteDatabase db = DBHelper.getDB();
+        db.execSQL("update image set level=? where _id =? and level <?",new Object[]{level,id,level});
+    }
 }

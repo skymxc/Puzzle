@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:src="@mipmap/back"
+            android:padding="17dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="选择难度"
+            android:textSize="20sp"
+            android:textColor="#fff"/>
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/easy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="18sp"
+        android:text="简单"
+        android:enabled="false"
+        android:background="@drawable/selector_select_level_bt_bg"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/normal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="18sp"
+        android:text="普通"
+        android:enabled="false"
+        android:background="@drawable/selector_select_level_bt_bg"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/hard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="18sp"
+        android:text="困难"
+        android:enabled="false"
+        android:background="@drawable/selector_select_level_bt_bg"
+        android:textColor="@android:color/white"/>
+
+    <Button
+        android:id="@+id/crazy"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:textSize="18sp"
+        android:text="疯狂"
+        android:enabled="false"
+        android:background="@drawable/selector_select_level_bt_bg"
+        android:textColor="@android:color/white"/>
+
+</LinearLayout>

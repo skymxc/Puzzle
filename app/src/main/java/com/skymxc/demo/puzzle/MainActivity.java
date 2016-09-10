@@ -17,6 +17,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -26,6 +27,7 @@ import android.widget.TextView;
 import com.skymxc.demo.puzzle.db.DBUtil;
 import com.skymxc.demo.puzzle.model.Image;
 import com.skymxc.demo.puzzle.utils.T;
+import com.skymxc.demo.puzzle.widget.SelectLevelDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,11 +45,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //裁剪的图片
     private File cropFile;
 
+    private SelectLevelDialog dialog;
+
     //请求码
     private static final int REQUEST_PICTURE=1;         //相册
     private static final int REQUEST_CAPTURE=2;         //相机
     private static final int REQUEST_PERMISSION=3;      //相机权限
     private static final int REQUEST_CUT=4;             //剪裁
+    private static final int REQUEST_GAME=5;             //跳转到GameActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +65,78 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         adapter = new ImageAdapter();
         gvImage.setAdapter(adapter);
         addPicks.setOnClickListener(this);
+        gvImage.setOnItemClickListener(itemClickListener);
+        gvImage.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Image image = images.get(i);
+                String str ="";
+                if (image.type == 0){   //判断图片是游戏自带的还是用户添加
+                    str="系统拼图不能删除，是否清楚数据？";
+                }else{
+                    str="是否删除游戏图片和数据？";
+                }
+                showDelDialog(str,image);
+                return true;
+            }
+        });
     }
+
+    /**
+     * 显示删除提示框
+     * @param str
+     * @param image
+     */
+    public void showDelDialog(String str,final Image image){
+        new AlertDialog.Builder(this).setMessage(str)
+                .setNeutralButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (image.type==0){
+                            //修改数据
+                            DBUtil.updateImage(image.id,0);
+                        }else{
+                            //删除
+                            File  file = new File(image.path);
+                            if (file.exists()){
+                                file.delete();
+                            }
+                            //删除数据库
+                            DBUtil.delImage(image.id);
+                        }
+                        flushImages();
+                    }
+                })
+                .setPositiveButton("取消",null)
+                .show();
+    }
+
+    /**
+     * 刷新游戏
+     */
+    private void flushImages() {
+        images.clear();
+        images.addAll(DBUtil.loadImages());
+        adapter.notifyDataSetChanged();
+    }
+
+    private AdapterView.OnItemClickListener itemClickListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Image image= images.get(i);
+            if (image.level> 0){
+                if (dialog == null){
+                    dialog = new SelectLevelDialog(MainActivity.this);
+
+                }
+                dialog.setOnButtonClickListener(MainActivity.this);
+                dialog.show();
+                dialog.setImage(image);
+            }else{
+                GameActicity.startActivityForResult(MainActivity.this,image.id,image.path,0,REQUEST_GAME);
+            }
+        }
+    };
 
     @Override
     public void onClick(View view) {
@@ -81,6 +157,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                        }
                    }
                }).show();
+
+                break;
+            case R.id.easy:
+                Image image = dialog.getImage();
+                GameActicity.startActivityForResult(MainActivity.this,image.id,image.path,0,REQUEST_GAME);
+                dialog.cancel();
+                break;
+            case R.id.normal:
+                 image = dialog.getImage();
+                GameActicity.startActivityForResult(MainActivity.this,image.id,image.path,1,REQUEST_GAME);
+                dialog.cancel();
+                break;
+            case R.id.hard:
+                 image = dialog.getImage();
+                GameActicity.startActivityForResult(MainActivity.this,image.id,image.path,2,REQUEST_GAME);
+                dialog.cancel();
+                break;
+            case R.id.crazy:
+                 image = dialog.getImage();
+                GameActicity.startActivityForResult(MainActivity.this,image.id,image.path,3,REQUEST_GAME);
+                dialog.cancel();
                 break;
         }
 
@@ -180,13 +277,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case REQUEST_CUT:           //裁剪
                     DBUtil.saveImage(new Image(cropFile.getPath(),0,1));
-                    images.clear();
-                    images.addAll(DBUtil.loadImages());
-                    adapter.notifyDataSetChanged();
+                    flushImages();
                     if (takePictureFile != null && takePictureFile.exists()){
                         takePictureFile.delete();
                         takePictureFile =null;
                     }
+                    break;
+                case REQUEST_GAME:
+                    flushImages();
                     break;
             }
         }
